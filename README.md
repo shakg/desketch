@@ -4,7 +4,8 @@
 
 A local-first desktop drawing app powered by Tauri and tldraw.
 
-<img width="1368" height="839" alt="image" src="https://github.com/user-attachments/assets/ba9192ca-15a1-4438-80df-e3dcb1204b60" />
+<img width="1205" height="838" alt="Screenshot from 2026-01-19 19-59-59" src="https://github.com/user-attachments/assets/135d7ead-3a9d-4a22-b779-8ac6803aaf36" />
+
 
 
 ## At a glance
