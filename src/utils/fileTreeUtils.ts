@@ -58,7 +58,7 @@ export function generateUniqueName(
 
 export async function getParentPath(path: string): Promise<string> {
   if (typeof window === 'undefined') {
-    const { dirname } = await import('node:path');
+    const { dirname } = await import('path');
     return dirname(path);
   }
   const { dirname } = await import('@tauri-apps/api/path');
@@ -100,7 +100,7 @@ export function validateRenameName(
 
 export async function isMoveIntoSelf(itemPath: string, newParentPath: string): Promise<boolean> {
   if (typeof window === 'undefined') {
-    const { normalize, sep } = await import('node:path');
+    const { normalize, sep } = await import('path');
     const normalizedItemPath = normalize(itemPath);
     const normalizedNewParentPath = normalize(newParentPath);
     const prefix = normalizedItemPath.endsWith(sep)
@@ -110,12 +110,13 @@ export async function isMoveIntoSelf(itemPath: string, newParentPath: string): P
   }
 
   const { normalize, sep } = await import('@tauri-apps/api/path');
-  const [normalizedItemPath, normalizedNewParentPath] = await Promise.all([
+  const [normalizedItemPath, normalizedNewParentPath, separator] = await Promise.all([
     normalize(itemPath),
     normalize(newParentPath),
+    sep(),
   ]);
-  const prefix = normalizedItemPath.endsWith(sep)
+  const prefix = normalizedItemPath.endsWith(separator)
     ? normalizedItemPath
-    : `${normalizedItemPath}${sep}`;
+    : `${normalizedItemPath}${separator}`;
   return normalizedNewParentPath.startsWith(prefix);
 }
