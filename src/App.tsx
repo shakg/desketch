@@ -27,7 +27,7 @@ function App() {
     isDirty: false,
   });
   const [editor, setEditor] = useState<Editor | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed] = useState(false);
 
   // Open folder as project
   const handleOpenFolder = useCallback(async () => {
