@@ -253,6 +253,21 @@ export function useGitSync(projectPath: string | null) {
     [runGitCommand, refresh, runWithBusy]
   );
 
+  const commitAll = useCallback(
+    async (message: string) => {
+      await runWithBusy(async () => {
+        const trimmed = message.trim();
+        if (!trimmed) {
+          throw new Error('Commit message cannot be empty.');
+        }
+        await runGitCommand(['add', '-A']);
+        await runGitCommand(['commit', '-m', trimmed]);
+        await refresh();
+      });
+    },
+    [runGitCommand, refresh, runWithBusy]
+  );
+
   const push = useCallback(async () => {
     await runWithBusy(async () => {
       await runGitCommand(['push']);
@@ -275,6 +290,7 @@ export function useGitSync(projectPath: string | null) {
     stageAll,
     unstageAll,
     commit,
+    commitAll,
     push,
     pull,
   };
