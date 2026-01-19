@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { join } from '@tauri-apps/api/path';
 import { readDir, stat, rename, remove, mkdir, copyFile, writeTextFile, exists } from '@tauri-apps/plugin-fs';
 import { watch } from '@tauri-apps/plugin-fs';
 import type { UnlistenFn } from '@tauri-apps/api/event';
@@ -64,7 +65,7 @@ interface UseFileTreeReturn {
 
   // Utility
   getItemById: (id: string) => FileSystemItem | null;
-  getParentPath: (path: string) => string;
+  getParentPath: (path: string) => Promise<string>;
   flattenTree: () => FileSystemItem[];
 }
 
@@ -83,9 +84,9 @@ async function buildTree(
 
     for (const entry of entries) {
       // Skip hidden files and directories
-      if (entry.name?.startsWith('.')) continue;
+      if (!entry.name || entry.name.startsWith('.')) continue;
 
-      const fullPath = `${dirPath}/${entry.name}`;
+      const fullPath = await join(dirPath, entry.name);
       let modifiedAt: number | undefined;
 
       try {
@@ -99,17 +100,17 @@ async function buildTree(
         const children = await buildTree(fullPath, sortMode, depth + 1, maxDepth);
         items.push({
           id: fullPath,
-          name: entry.name!,
+          name: entry.name,
           path: fullPath,
           type: 'folder',
           children,
           isExpanded: false,
           modifiedAt,
         });
-      } else if (entry.name?.endsWith('.tldr')) {
+      } else if (entry.name.endsWith('.tldr')) {
         items.push({
           id: fullPath,
-          name: entry.name!,
+          name: entry.name,
           path: fullPath,
           type: 'file',
           modifiedAt,
@@ -353,10 +354,9 @@ export function useFileTree({
       return { success: true };
     }
 
-    const parentPath = getParentPath(item.path);
-    const newPath = `${parentPath}/${newName}`;
-
     try {
+      const parentPath = await getParentPath(item.path);
+      const newPath = await join(parentPath, newName);
       // Check if target exists
       const targetExists = await exists(newPath);
       if (targetExists) {
@@ -387,7 +387,7 @@ export function useFileTree({
         const entries = await readDir(parentPath);
         const existingNames = new Set(entries.map((e) => e.name || ''));
         const uniqueName = generateUniqueName(actualName, existingNames, true);
-        const filePath = `${parentPath}/${uniqueName}`;
+        const filePath = await join(parentPath, uniqueName);
 
         // Create empty tldr file with minimal content
         const emptyContent = JSON.stringify({
@@ -417,7 +417,7 @@ export function useFileTree({
         const entries = await readDir(parentPath);
         const existingNames = new Set(entries.map((e) => e.name || ''));
         const uniqueName = generateUniqueName(baseName, existingNames, false);
-        const folderPath = `${parentPath}/${uniqueName}`;
+        const folderPath = await join(parentPath, uniqueName);
 
         await mkdir(folderPath);
         await loadTree();
@@ -467,13 +467,12 @@ export function useFileTree({
         return { success: false, error: 'Folder duplication not yet supported' };
       }
 
-      const parentPath = getParentPath(item.path);
-
-      try {
-        const entries = await readDir(parentPath);
-        const existingNames = new Set(entries.map((e) => e.name || ''));
-        const newName = generateUniqueName(item.name, existingNames, true);
-        const newPath = `${parentPath}/${newName}`;
+    try {
+      const parentPath = await getParentPath(item.path);
+      const entries = await readDir(parentPath);
+      const existingNames = new Set(entries.map((e) => e.name || ''));
+      const newName = generateUniqueName(item.name, existingNames, true);
+      const newPath = await join(parentPath, newName);
 
         await copyFile(item.path, newPath);
         await loadTree();
@@ -495,11 +494,17 @@ export function useFileTree({
       }
 
       // Prevent moving folder into itself
-      if (isMoveIntoSelf(item.path, newParentPath)) {
+      let moveIntoSelf = false;
+      try {
+        moveIntoSelf = await isMoveIntoSelf(item.path, newParentPath);
+      } catch (error) {
+        return { success: false, error: `Failed to validate move: ${error}` };
+      }
+      if (moveIntoSelf) {
         return { success: false, error: 'Cannot move folder into itself' };
       }
 
-      const newPath = `${newParentPath}/${item.name}`;
+      const newPath = await join(newParentPath, item.name);
 
       try {
         // Check if target exists

@@ -56,10 +56,13 @@ export function generateUniqueName(
   return `${nameWithoutExt}-copy-${counter}${ext}`;
 }
 
-export function getParentPath(path: string): string {
-  const parts = path.split('/');
-  parts.pop();
-  return parts.join('/');
+export async function getParentPath(path: string): Promise<string> {
+  if (typeof window === 'undefined') {
+    const { dirname } = await import('node:path');
+    return dirname(path);
+  }
+  const { dirname } = await import('@tauri-apps/api/path');
+  return dirname(path);
 }
 
 export function collectFolderIds(items: FileSystemItem[]): string[] {
@@ -95,6 +98,24 @@ export function validateRenameName(
   return { ok: true, name };
 }
 
-export function isMoveIntoSelf(itemPath: string, newParentPath: string): boolean {
-  return newParentPath.startsWith(`${itemPath}/`);
+export async function isMoveIntoSelf(itemPath: string, newParentPath: string): Promise<boolean> {
+  if (typeof window === 'undefined') {
+    const { normalize, sep } = await import('node:path');
+    const normalizedItemPath = normalize(itemPath);
+    const normalizedNewParentPath = normalize(newParentPath);
+    const prefix = normalizedItemPath.endsWith(sep)
+      ? normalizedItemPath
+      : `${normalizedItemPath}${sep}`;
+    return normalizedNewParentPath.startsWith(prefix);
+  }
+
+  const { normalize, sep } = await import('@tauri-apps/api/path');
+  const [normalizedItemPath, normalizedNewParentPath] = await Promise.all([
+    normalize(itemPath),
+    normalize(newParentPath),
+  ]);
+  const prefix = normalizedItemPath.endsWith(sep)
+    ? normalizedItemPath
+    : `${normalizedItemPath}${sep}`;
+  return normalizedNewParentPath.startsWith(prefix);
 }

@@ -7,6 +7,7 @@ import {
   loadSnapshot,
 } from "tldraw";
 import "tldraw/tldraw.css";
+import { basename } from "@tauri-apps/api/path";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { Sidebar } from "./components/Sidebar";
@@ -29,8 +30,9 @@ function App() {
     isDirty: false,
   });
   const [editor, setEditor] = useState<Editor | null>(null);
-  const [sidebarCollapsed] = useState(false);
+  const sidebarCollapsed = false;
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [projectName, setProjectName] = useState<string | null>(null);
   const [advancedGit, setAdvancedGit] = useState(() => {
     try {
       return localStorage.getItem("desketch.git.advanced") === "true";
@@ -38,6 +40,29 @@ function App() {
       return false;
     }
   });
+
+  const clearEditor = useCallback(() => {
+    if (!editor) return;
+    const allShapeIds = editor.getCurrentPageShapeIds();
+    if (allShapeIds.size > 0) {
+      editor.deleteShapes([...allShapeIds]);
+    }
+  }, [editor]);
+
+  const updateCurrentFileState = useCallback(async (filePath: string) => {
+    let fileName = "untitled.tldr";
+    try {
+      fileName = (await basename(filePath)) || fileName;
+    } catch {
+      // Fall back to default filename on path errors.
+    }
+    setState((prev) => ({
+      ...prev,
+      currentFilePath: filePath,
+      currentFileName: fileName,
+      isDirty: false,
+    }));
+  }, []);
 
   // Open folder as project
   const handleOpenFolder = useCallback(async () => {
@@ -56,14 +81,9 @@ function App() {
         isDirty: false,
       }));
       // Reset editor if exists
-      if (editor) {
-        const allShapeIds = editor.getCurrentPageShapeIds();
-        if (allShapeIds.size > 0) {
-          editor.deleteShapes([...allShapeIds]);
-        }
-      }
+      clearEditor();
     }
-  }, [editor]);
+  }, [clearEditor]);
 
   // Open a file from the sidebar
   const handleOpenFile = useCallback(
@@ -74,18 +94,12 @@ function App() {
         const content = await readTextFile(filePath);
         const snapshot = JSON.parse(content) as TLStoreSnapshot;
         loadSnapshot(editor.store, snapshot);
-        const fileName = filePath.split("/").pop() || "untitled.tldr";
-        setState((prev) => ({
-          ...prev,
-          currentFilePath: filePath,
-          currentFileName: fileName,
-          isDirty: false,
-        }));
+        await updateCurrentFileState(filePath);
       } catch (error) {
         console.error("Failed to open file:", error);
       }
     },
-    [editor]
+    [editor, updateCurrentFileState]
   );
 
   // Save current drawing to file
@@ -120,19 +134,12 @@ function App() {
           ? filePath
           : `${filePath}.tldr`;
         await writeTextFile(finalPath, content);
-
-        const fileName = finalPath.split("/").pop() || "untitled.tldr";
-        setState((prev) => ({
-          ...prev,
-          currentFilePath: finalPath,
-          currentFileName: fileName,
-          isDirty: false,
-        }));
+        await updateCurrentFileState(finalPath);
       } catch (error) {
         console.error("Failed to save file:", error);
       }
     }
-  }, [editor, state.projectPath]);
+  }, [editor, state.projectPath, updateCurrentFileState]);
 
   // Create new drawing
   const handleNewDrawing = useCallback(async () => {
@@ -147,10 +154,7 @@ function App() {
     if (filePath) {
       try {
         // Clear the editor
-        const allShapeIds = editor.getCurrentPageShapeIds();
-        if (allShapeIds.size > 0) {
-          editor.deleteShapes([...allShapeIds]);
-        }
+        clearEditor();
 
         // Save empty drawing
         const snapshot = getSnapshot(editor.store);
@@ -159,19 +163,12 @@ function App() {
           ? filePath
           : `${filePath}.tldr`;
         await writeTextFile(finalPath, content);
-
-        const fileName = finalPath.split("/").pop() || "untitled.tldr";
-        setState((prev) => ({
-          ...prev,
-          currentFilePath: finalPath,
-          currentFileName: fileName,
-          isDirty: false,
-        }));
+        await updateCurrentFileState(finalPath);
       } catch (error) {
         console.error("Failed to create new drawing:", error);
       }
     }
-  }, [editor, state.projectPath]);
+  }, [editor, state.projectPath, clearEditor, updateCurrentFileState]);
 
   // Track changes to mark as dirty
   const handleEditorMount = useCallback((editorInstance: Editor) => {
@@ -233,7 +230,29 @@ function App() {
     }
   }, [advancedGit]);
 
-  const projectName = state.projectPath?.split("/").pop() || null;
+  useEffect(() => {
+    let isActive = true;
+    if (!state.projectPath) {
+      setProjectName(null);
+      return;
+    }
+
+    basename(state.projectPath)
+      .then((name) => {
+        if (isActive) {
+          setProjectName(name || null);
+        }
+      })
+      .catch(() => {
+        if (isActive) {
+          setProjectName(null);
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [state.projectPath]);
 
   return (
     <div className="app">

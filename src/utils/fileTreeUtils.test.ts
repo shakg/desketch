@@ -86,13 +86,13 @@ describe('sortItems', () => {
 });
 
 describe('path helpers', () => {
-  it('returns the parent path for a file', () => {
-    expect(getParentPath('/projects/alpha/sketch.tldr')).toBe('/projects/alpha');
+  it('returns the parent path for a file', async () => {
+    expect(await getParentPath('/projects/alpha/sketch.tldr')).toBe('/projects/alpha');
   });
 
-  it('detects moves into a folder itself', () => {
-    expect(isMoveIntoSelf('/projects/alpha', '/projects/alpha/sub')).toBe(true);
-    expect(isMoveIntoSelf('/projects/alpha', '/projects/beta')).toBe(false);
+  it('detects moves into a folder itself', async () => {
+    expect(await isMoveIntoSelf('/projects/alpha', '/projects/alpha/sub')).toBe(true);
+    expect(await isMoveIntoSelf('/projects/alpha', '/projects/beta')).toBe(false);
   });
 
   it('collects folder ids recursively', () => {

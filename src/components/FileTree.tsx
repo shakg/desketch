@@ -9,6 +9,7 @@ import {
   useSensors,
   DragOverlay,
 } from '@dnd-kit/core';
+import { dirname } from '@tauri-apps/api/path';
 import { FileItem } from './FileItem';
 import { ContextMenu, createFileMenuItems, createFolderMenuItems, createEmptyMenuItems } from './ContextMenu';
 import { Icon } from './Icon';
@@ -48,6 +49,22 @@ interface ContextMenuState {
   position: ContextMenuPosition;
   items: ContextMenuItem[];
   targetId: string | null;
+}
+
+function matchesSearch(item: FileSystemItem, query: string): boolean {
+  return item.name.toLowerCase().includes(query);
+}
+
+function hasMatchingDescendants(item: FileSystemItem, query: string): boolean {
+  if (!item.children?.length) return false;
+  return item.children.some(
+    (child) => matchesSearch(child, query) || hasMatchingDescendants(child, query)
+  );
+}
+
+function shouldIncludeItem(item: FileSystemItem, query: string): boolean {
+  if (!query) return true;
+  return matchesSearch(item, query) || hasMatchingDescendants(item, query);
 }
 
 export function FileTree({
@@ -98,6 +115,7 @@ export function FileTree({
   });
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const normalizedQuery = searchQuery.trim().toLowerCase();
 
   // Configure drag sensor with activation distance
   const sensors = useSensors(
@@ -114,14 +132,7 @@ export function FileTree({
     const traverse = (items: FileSystemItem[]) => {
       for (const item of items) {
         // Filter by search query
-        if (searchQuery) {
-          const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-          const hasMatchingChildren = item.children?.some(child =>
-            child.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            child.children?.some(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
-          );
-          if (!matchesSearch && !hasMatchingChildren) continue;
-        }
+        if (!shouldIncludeItem(item, normalizedQuery)) continue;
 
         flat.push(item);
         if (item.type === 'folder' && expandedIds.has(item.id) && item.children) {
@@ -131,11 +142,11 @@ export function FileTree({
     };
     traverse(items);
     return flat;
-  }, [items, expandedIds, searchQuery]);
+  }, [items, expandedIds, normalizedQuery]);
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
+    async (e: KeyboardEvent) => {
       const flat = flattenVisibleTree();
       const currentIndex = flat.findIndex((i) => i.id === focusedId);
       const currentItem = currentIndex >= 0 ? flat[currentIndex] : null;
@@ -176,10 +187,14 @@ export function FileTree({
             onToggleExpand(currentItem.id);
           } else if (currentItem) {
             // Go to parent
-            const parentPath = currentItem.path.split('/').slice(0, -1).join('/');
-            const parent = flat.find((i) => i.path === parentPath);
-            if (parent) {
-              onFocusChange(parent.id);
+            try {
+              const parentPath = await dirname(currentItem.path);
+              const parent = flat.find((i) => i.path === parentPath);
+              if (parent) {
+                onFocusChange(parent.id);
+              }
+            } catch (error) {
+              console.error('Failed to resolve parent path:', error);
             }
           }
           break;
@@ -379,14 +394,7 @@ export function FileTree({
     (items: FileSystemItem[], depth = 0): React.ReactNode => {
       return items.map((item) => {
         // Filter by search query
-        if (searchQuery) {
-          const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-          const hasMatchingChildren = item.children?.some(child =>
-            child.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            child.children?.some(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
-          );
-          if (!matchesSearch && !hasMatchingChildren) return null;
-        }
+        if (!shouldIncludeItem(item, normalizedQuery)) return null;
 
         const isExpanded = expandedIds.has(item.id);
         const isSelected = selection.selectedIds.has(item.id);
@@ -441,6 +449,7 @@ export function FileTree({
       errorFilePaths,
       renameState,
       dragState,
+      normalizedQuery,
       searchQuery,
       onToggleExpand,
       handleItemClick,

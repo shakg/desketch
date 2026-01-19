@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { ask } from '@tauri-apps/plugin-dialog';
 import { SidebarToolbar } from './SidebarToolbar';
 import { SearchInput } from './SearchInput';
@@ -19,6 +19,8 @@ interface SidebarProps {
   onOpenSettings: () => void;
 }
 
+const emptyErrorFilePaths = new Set<string>();
+
 export function Sidebar({
   projectPath,
   projectName,
@@ -33,7 +35,7 @@ export function Sidebar({
 }: SidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [focusedId, setFocusedId] = useState<string | null>(null);
-  const [errorFilePaths] = useState<Set<string>>(new Set());
+  const errorFilePaths = emptyErrorFilePaths;
 
   // Error handler
   const handleError = useCallback((error: string) => {
@@ -47,13 +49,25 @@ export function Sidebar({
     onFileSelect: onOpenFile,
     onError: handleError,
   });
+  const fileTreeRef = useRef(fileTree);
+  const projectPathRef = useRef(projectPath);
+  const handleCreateFolderRef = useRef<(path: string) => Promise<void>>();
+  const handleDuplicateRef = useRef<(id: string) => Promise<void>>();
+
+  useEffect(() => {
+    fileTreeRef.current = fileTree;
+  }, [fileTree]);
+
+  useEffect(() => {
+    projectPathRef.current = projectPath;
+  }, [projectPath]);
 
   // Load tree when project changes
   useEffect(() => {
     if (projectPath) {
       fileTree.loadTree();
     }
-  }, [projectPath]);
+  }, [projectPath, fileTree.loadTree]);
 
   // Handle new file creation
   const handleCreateFile = useCallback(
@@ -76,6 +90,10 @@ export function Sidebar({
     },
     [fileTree, handleError]
   );
+
+  useEffect(() => {
+    handleCreateFolderRef.current = handleCreateFolder;
+  }, [handleCreateFolder]);
 
   // Handle delete with confirmation
   const handleDelete = useCallback(
@@ -123,6 +141,10 @@ export function Sidebar({
     [fileTree, handleError]
   );
 
+  useEffect(() => {
+    handleDuplicateRef.current = handleDuplicate;
+  }, [handleDuplicate]);
+
   // Handle move (drag and drop)
   const handleMove = useCallback(
     async (id: string, targetPath: string) => {
@@ -150,13 +172,14 @@ export function Sidebar({
   // Handle Ctrl+N for new drawing
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!projectPath) return;
+      const currentProjectPath = projectPathRef.current;
+      if (!currentProjectPath) return;
 
       if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
         if (e.shiftKey) {
           // Ctrl+Shift+N for new folder
           e.preventDefault();
-          handleCreateFolder(projectPath);
+          handleCreateFolderRef.current?.(currentProjectPath);
         }
         // Regular Ctrl+N is handled by parent
       }
@@ -168,11 +191,11 @@ export function Sidebar({
         if (!sidebar?.contains(document.activeElement)) return;
 
         e.preventDefault();
-        const selectedId = fileTree.selection.lastSelectedId;
+        const selectedId = fileTreeRef.current.selection.lastSelectedId;
         if (selectedId) {
-          const item = fileTree.getItemById(selectedId);
+          const item = fileTreeRef.current.getItemById(selectedId);
           if (item?.type === 'file') {
-            handleDuplicate(selectedId);
+            handleDuplicateRef.current?.(selectedId);
           }
         }
       }
@@ -183,14 +206,14 @@ export function Sidebar({
         const sidebar = document.querySelector('.sidebar');
         if (sidebar?.contains(document.activeElement)) {
           e.preventDefault();
-          fileTree.selectAll();
+          fileTreeRef.current.selectAll();
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [projectPath, fileTree, handleCreateFolder, handleDuplicate]);
+  }, []);
 
   // No project open
   if (!projectPath) {
