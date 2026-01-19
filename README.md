@@ -38,6 +38,19 @@ Build:
 npm run build
 ```
 
+## Initialize a repo for drawings
+Create a new Git repo and use it as your Desketch project folder.
+
+1) Create a new repository named `docs` (on GitHub or locally).
+2) Clone it:
+
+```bash
+git clone git@github.com:YOUR_USER/docs.git
+```
+
+3) Open Desketch, choose "Open Project Folder", and select the cloned `docs` folder.
+4) Create or save `.tldr` drawings inside the repo so they are Git-enabled and easy to version.
+
 ## Tech stack
 - Tauri 2
 - React 19
