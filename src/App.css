@@ -160,7 +160,7 @@ body,
 .dropdown-menu {
   position: absolute;
   top: 100%;
-  right: 0;
+  right: 8px;
   min-width: 180px;
   background: var(--bg-tertiary);
   border: 1px solid var(--border);
