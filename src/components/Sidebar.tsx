@@ -51,8 +51,8 @@ export function Sidebar({
   });
   const fileTreeRef = useRef(fileTree);
   const projectPathRef = useRef(projectPath);
-  const handleCreateFolderRef = useRef<(path: string) => Promise<void>>();
-  const handleDuplicateRef = useRef<(id: string) => Promise<void>>();
+  const handleCreateFolderRef = useRef<((path: string) => Promise<void>) | undefined>(undefined);
+  const handleDuplicateRef = useRef<((id: string) => Promise<void>) | undefined>(undefined);
 
   useEffect(() => {
     fileTreeRef.current = fileTree;
