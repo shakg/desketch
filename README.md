@@ -2,6 +2,9 @@
 
 A local-first desktop drawing app powered by Tauri and tldraw.
 
+<img width="1368" height="839" alt="image" src="https://github.com/user-attachments/assets/ba9192ca-15a1-4438-80df-e3dcb1204b60" />
+
+
 ## At a glance
 - Works offline with local folders and Git-friendly `.tldr` files
 - Fast canvas with a minimal UI focused on drawing
