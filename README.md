@@ -1,5 +1,7 @@
 # Desketch
 
+[![Build desktop apps](https://github.com/shakg/desketch/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/shakg/desketch/actions/workflows/build.yml)
+
 A local-first desktop drawing app powered by Tauri and tldraw.
 
 <img width="1368" height="839" alt="image" src="https://github.com/user-attachments/assets/ba9192ca-15a1-4438-80df-e3dcb1204b60" />
@@ -92,6 +94,18 @@ Build:
 ```bash
 npm run build
 ```
+
+### Windows developer setup
+Use the PowerShell installer on Windows:
+
+```powershell
+.\install.ps1
+```
+
+Notes:
+- The script installs Node.js (LTS), Rust (rustup), and Visual Studio Build Tools.
+- When the Visual Studio installer opens, select **Desktop development with C++**.
+- After installation, run `npm install` and `npm run tauri dev`.
 
 ## Initialize a repo for drawings
 Create a new Git repo and use it as your Desketch project folder.
