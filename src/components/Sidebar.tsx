@@ -159,6 +159,10 @@ export function Sidebar({
 
       // Ctrl+D for duplicate
       if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+        // Only handle if sidebar is focused
+        const sidebar = document.querySelector('.sidebar');
+        if (!sidebar?.contains(document.activeElement)) return;
+
         e.preventDefault();
         const selectedId = fileTree.selection.lastSelectedId;
         if (selectedId) {

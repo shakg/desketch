@@ -2,11 +2,63 @@
 
 A local-first desktop drawing app powered by Tauri and tldraw.
 
+## At a glance
+- Works offline with local folders and Git-friendly `.tldr` files
+- Fast canvas with a minimal UI focused on drawing
+- Desktop-first workflow with project folders and a status bar
+
+## Quick start
+1) Install dependencies:
+
+```bash
+npm install
+```
+
+2) Run the desktop app:
+
+```bash
+npm run tauri dev
+```
+
+3) Open a project folder and start drawing.
+
 ## Features
 - Open a project folder and browse drawings from the sidebar
 - Create new drawings and save to `.tldr` files
 - Dirty-state indicator and status bar for current file/project
 - Keyboard shortcuts for open, new, and save
+
+## Usage
+Desketch is folder-based: you open a directory and the app treats it as your drawing project. Files are stored as `.tldr` so they are easy to version with Git and share.
+
+### Open a project folder
+1) Launch Desketch.
+2) Use **Open Project Folder** or `Ctrl/Cmd+O`.
+3) Choose a folder on disk (an existing repo works great).
+
+Once opened, the sidebar lists the drawings in that folder.
+
+### Create a new drawing
+1) Use **New Drawing** or `Ctrl/Cmd+N`.
+2) Give the drawing a name.
+3) Start sketching on the canvas.
+
+Desketch creates a new `.tldr` file in the project folder.
+
+### Save changes
+Desketch shows a dirty-state indicator when there are unsaved changes.
+
+1) Use **Save** or `Ctrl/Cmd+S`.
+2) The current drawing is saved back to its `.tldr` file.
+
+### Organize with Git
+Because drawings are plain files in your project folder, you can commit them like any other asset.
+
+```bash
+git status
+git add .
+git commit -m "Add new concept sketches"
+```
 
 ## Keyboard shortcuts
 - `Ctrl/Cmd+O` Open project folder
