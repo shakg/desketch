@@ -71,8 +71,9 @@ export function SidebarToolbar({
         title="New Folder (Ctrl+Shift+N)"
       >
         <span className="toolbar-icon">
-          <Icon name="folder" />
+          <Icon name="folder-plus" />
         </span>
+        <span className="toolbar-label">Folder</span>
       </button>
 
       <button
@@ -84,6 +85,7 @@ export function SidebarToolbar({
         <span className={`toolbar-icon ${isSyncing ? 'spinning' : ''}`}>
           <Icon name="refresh" />
         </span>
+        <span className="toolbar-label">Refresh</span>
       </button>
 
       <div className="toolbar-spacer" />

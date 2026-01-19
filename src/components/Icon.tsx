@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 type IconName =
   | 'plus'
   | 'folder'
+  | 'folder-plus'
   | 'folder-open'
   | 'refresh'
   | 'more'
@@ -46,6 +47,13 @@ export function Icon({ name, size = 16, className }: IconProps): ReactNode {
       return (
         <svg {...commonProps(size, className)}>
           <path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+        </svg>
+      );
+    case 'folder-plus':
+      return (
+        <svg {...commonProps(size, className)}>
+          <path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+          <path d="M16 13v6M13 16h6" />
         </svg>
       );
     case 'folder-open':

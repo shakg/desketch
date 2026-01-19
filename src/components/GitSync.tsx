@@ -3,6 +3,7 @@ import { useGitSync } from '../hooks/useGitSync';
 
 interface GitSyncProps {
   projectPath: string | null;
+  fileTreeSyncing?: boolean;
 }
 
 type GitMessage = {
@@ -27,7 +28,7 @@ function getStatusClass(status: string) {
   }
 }
 
-export function GitSync({ projectPath }: GitSyncProps) {
+export function GitSync({ projectPath, fileTreeSyncing }: GitSyncProps) {
   const git = useGitSync(projectPath);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [commitMessage, setCommitMessage] = useState('');
@@ -61,6 +62,13 @@ export function GitSync({ projectPath }: GitSyncProps) {
       setMessage({ type: 'error', text: git.error });
     }
   }, [git.error]);
+
+  useEffect(() => {
+    if (!projectPath || isCollapsed) return;
+    if (!fileTreeSyncing) {
+      git.refresh();
+    }
+  }, [fileTreeSyncing, isCollapsed, projectPath, git.refresh]);
 
   const stagedCount = useMemo(
     () => git.files.filter((file) => file.staged).length,

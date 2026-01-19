@@ -269,7 +269,7 @@ export function Sidebar({
         )}
       </div>
 
-      <GitSync projectPath={projectPath} />
+      <GitSync projectPath={projectPath} fileTreeSyncing={fileTree.isSyncing} />
     </aside>
   );
 }

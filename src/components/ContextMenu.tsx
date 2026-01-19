@@ -164,7 +164,7 @@ export function createFolderMenuItems(
     {
       id: 'newFolder',
       label: 'New Folder',
-      icon: <Icon name="folder" />,
+      icon: <Icon name="folder-plus" />,
       action: onNewFolder,
     },
     { id: 'sep1', label: '', separator: true },
@@ -210,7 +210,7 @@ export function createEmptyMenuItems(
     {
       id: 'newFolder',
       label: 'New Folder',
-      icon: <Icon name="folder" />,
+      icon: <Icon name="folder-plus" />,
       action: onNewFolder,
     },
     { id: 'sep1', label: '', separator: true },
