@@ -10,6 +10,8 @@ import "tldraw/tldraw.css";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { Sidebar } from "./components/Sidebar";
+import { GitStatusBar } from "./components/GitStatusBar";
+import { SettingsModal } from "./components/SettingsModal";
 import "./App.css";
 
 interface AppState {
@@ -28,6 +30,14 @@ function App() {
   });
   const [editor, setEditor] = useState<Editor | null>(null);
   const [sidebarCollapsed] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [advancedGit, setAdvancedGit] = useState(() => {
+    try {
+      return localStorage.getItem("desketch.git.advanced") === "true";
+    } catch {
+      return false;
+    }
+  });
 
   // Open folder as project
   const handleOpenFolder = useCallback(async () => {
@@ -215,6 +225,14 @@ function App() {
     handleNewDrawing,
   ]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem("desketch.git.advanced", String(advancedGit));
+    } catch {
+      // Ignore storage failures.
+    }
+  }, [advancedGit]);
+
   const projectName = state.projectPath?.split("/").pop() || null;
 
   return (
@@ -227,9 +245,11 @@ function App() {
           currentFilePath={state.currentFilePath}
           isDirty={state.isDirty}
           isCollapsed={sidebarCollapsed}
+          showGitPanel={advancedGit}
           onOpenFolder={handleOpenFolder}
           onOpenFile={handleOpenFile}
           onNewDrawing={handleNewDrawing}
+          onOpenSettings={() => setSettingsOpen(true)}
         />
 
         {/* Canvas */}
@@ -269,10 +289,19 @@ function App() {
         <span className="status-project">
           {projectName ? `Project: ${projectName}` : ""}
         </span>
-        <span className="status-indicator">
-          {state.isDirty ? "Unsaved changes" : state.currentFilePath ? "Saved ✓" : ""}
-        </span>
+        <div className="status-right">
+          <GitStatusBar projectPath={state.projectPath} advancedEnabled={advancedGit} />
+          <span className="status-indicator">
+            {state.isDirty ? "Unsaved changes" : state.currentFilePath ? "Saved ✓" : ""}
+          </span>
+        </div>
       </footer>
+      <SettingsModal
+        isOpen={settingsOpen}
+        advancedGit={advancedGit}
+        onClose={() => setSettingsOpen(false)}
+        onChangeAdvancedGit={setAdvancedGit}
+      />
     </div>
   );
 }

@@ -73,6 +73,12 @@ body,
   border-bottom: 1px solid var(--border);
 }
 
+.sidebar-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .project-name {
   font-size: 12px;
   font-weight: 600;
@@ -88,6 +94,25 @@ body,
   font-size: 10px;
   color: var(--text-secondary);
   animation: pulse 1.5s ease-in-out infinite;
+}
+
+.sidebar-settings {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sidebar-settings:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 @keyframes pulse {
@@ -923,6 +948,7 @@ kbd {
   background: var(--bg-secondary);
   border-top: 1px solid var(--border);
   font-size: 12px;
+  gap: 12px;
 }
 
 .status-file {
@@ -935,6 +961,176 @@ kbd {
 
 .status-indicator {
   color: var(--success);
+}
+
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-git {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.status-git.disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.status-git-label {
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-size: 10px;
+  color: inherit;
+}
+
+.status-git.success {
+  color: var(--success);
+  border-color: rgba(76, 175, 80, 0.35);
+}
+
+.status-git.warning {
+  color: var(--warning);
+  border-color: rgba(255, 152, 0, 0.35);
+}
+
+.status-git.error {
+  color: var(--error);
+  border-color: rgba(244, 67, 54, 0.35);
+}
+
+.status-git.info {
+  color: var(--accent);
+  border-color: rgba(0, 120, 212, 0.35);
+}
+
+.status-git.muted {
+  color: var(--text-secondary);
+}
+
+.status-git:not(.disabled):hover {
+  background: var(--bg-hover);
+}
+
+/* Settings Modal */
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.settings-backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  background: rgba(10, 10, 10, 0.6);
+  z-index: 0;
+}
+
+.settings-modal {
+  position: relative;
+  z-index: 1;
+  width: min(520px, 90vw);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.settings-header h2 {
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.settings-close {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.settings-close:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-tertiary);
+}
+
+.settings-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-title {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.settings-help {
+  font-size: 11px;
+  color: var(--text-secondary);
+  max-width: 260px;
+}
+
+.settings-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--bg-secondary);
+}
+
+.settings-option {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.settings-option.active {
+  background: var(--accent);
+  color: white;
+}
+
+.settings-option:not(.active):hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 /* Tldraw Overrides */

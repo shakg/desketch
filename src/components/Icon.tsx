@@ -13,7 +13,8 @@ type IconName =
   | 'edit'
   | 'copy'
   | 'link'
-  | 'trash';
+  | 'trash'
+  | 'settings';
 
 interface IconProps {
   name: IconName;
@@ -125,6 +126,13 @@ export function Icon({ name, size = 16, className }: IconProps): ReactNode {
           <path d="M8 6V4h8v2" />
           <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
           <path d="M10 11v6M14 11v6" />
+        </svg>
+      );
+    case 'settings':
+      return (
+        <svg {...commonProps(size, className)}>
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-1.42 3.42h-.09a1.65 1.65 0 0 0-1.51 1.05l-.03.09a2 2 0 0 1-3.76 0l-.03-.09a1.65 1.65 0 0 0-1.51-1.05h-.09a2 2 0 0 1-1.42-3.42l.06-.06a1.65 1.65 0 0 0 .33-1.82l-.03-.09a2 2 0 0 1 0-1.6l.03-.09a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 1.42-3.42h.09a1.65 1.65 0 0 0 1.51-1.05l.03-.09a2 2 0 0 1 3.76 0l.03.09a1.65 1.65 0 0 0 1.51 1.05h.09a2 2 0 0 1 1.42 3.42l-.06.06a1.65 1.65 0 0 0-.33 1.82l.03.09a2 2 0 0 1 0 1.6z" />
         </svg>
       );
     default:

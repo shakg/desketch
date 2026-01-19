@@ -282,6 +282,13 @@ export function useGitSync(projectPath: string | null) {
     });
   }, [runGitCommand, refresh, runWithBusy]);
 
+  const fetch = useCallback(async () => {
+    await runWithBusy(async () => {
+      await runGitCommand(['fetch']);
+      await refresh();
+    });
+  }, [runGitCommand, refresh, runWithBusy]);
+
   return {
     ...state,
     refresh,
@@ -293,5 +300,6 @@ export function useGitSync(projectPath: string | null) {
     commitAll,
     push,
     pull,
+    fetch,
   };
 }

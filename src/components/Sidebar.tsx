@@ -12,9 +12,11 @@ interface SidebarProps {
   currentFilePath: string | null;
   isDirty: boolean;
   isCollapsed: boolean;
+  showGitPanel: boolean;
   onOpenFolder: () => void;
   onOpenFile: (path: string) => void;
   onNewDrawing: () => void;
+  onOpenSettings: () => void;
 }
 
 export function Sidebar({
@@ -23,9 +25,11 @@ export function Sidebar({
   currentFilePath,
   isDirty,
   isCollapsed,
+  showGitPanel,
   onOpenFolder,
   onOpenFile,
   onNewDrawing,
+  onOpenSettings,
 }: SidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [focusedId, setFocusedId] = useState<string | null>(null);
@@ -204,17 +208,18 @@ export function Sidebar({
     <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header">
         <span className="project-name">{projectName}</span>
-        {fileTree.isSyncing && <span className="sync-indicator">Syncing...</span>}
+        <div className="sidebar-header-actions">
+          {fileTree.isSyncing && <span className="sync-indicator">Syncing...</span>}
+          <button className="sidebar-settings" type="button" onClick={onOpenSettings}>
+            Settings
+          </button>
+        </div>
       </div>
 
       <SidebarToolbar
         onNewDrawing={() => handleCreateFile(projectPath)}
         onNewFolder={() => handleCreateFolder(projectPath)}
         onRefresh={fileTree.loadTree}
-        onCollapseAll={fileTree.collapseAll}
-        onExpandAll={fileTree.expandAll}
-        sortMode={fileTree.sortMode}
-        onSortModeChange={fileTree.setSortMode}
         isSyncing={fileTree.isSyncing}
         disabled={!projectPath}
       />
@@ -269,7 +274,9 @@ export function Sidebar({
         )}
       </div>
 
-      <GitSync projectPath={projectPath} fileTreeSyncing={fileTree.isSyncing} />
+      {showGitPanel && (
+        <GitSync projectPath={projectPath} fileTreeSyncing={fileTree.isSyncing} />
+      )}
     </aside>
   );
 }
